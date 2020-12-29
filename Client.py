@@ -76,7 +76,7 @@ def client():
     # while True:
         print(res.decode('utf-8'))
         print(resres.decode('utf-8'))
-        print('Start pressing keys on your keyboard as fast as you can!!')
+        # print('Start pressing keys on your keyboard as fast as you can!!')
         # Input = input('Start pressing keys on your keyboard as fast as you can!!')
         # duration is in seconds
         s = input()
