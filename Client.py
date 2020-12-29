@@ -12,7 +12,6 @@ from random import randrange
 TIMEOUT = 10
 answer = None
 
-
 def check():
             # print ('You have 10 seconds to type in your stuff...')
             time.sleep(10)
