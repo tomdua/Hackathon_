@@ -42,6 +42,7 @@ def client():
     bufferSize          = 2048
     serverPort          = 13117
 
+
     # Create a UDP socket at client side
     UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     print("Client started, listening for offer requests...")
@@ -57,6 +58,7 @@ def client():
     # msg = "Message from Server {}".format(msgFromServer[0])
     # print(msg)
 
+    ClientMultiSocket.close()
 
 
     # TCP
@@ -91,6 +93,5 @@ def client():
         print(res2.decode('utf-8'))
 
     ClientMultiSocket.close()
-
 if __name__ == "__main__":
     client()
