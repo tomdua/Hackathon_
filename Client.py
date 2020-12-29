@@ -42,23 +42,20 @@ def client():
     serverPort          = 13117
 
 
-    # Create a UDP socket at client side
-    UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    print("Client started, listening for offer requests...")
-    #GETserver using created UDP socket
-    ixd=randrange(255)
-    UDPClientSocket.bind(("127.0.0.{}".format(ixd), serverPort))
-    while True:
-        message, clientAddress = UDPClientSocket.recvfrom(bufferSize)
-        print(struct.unpack('QQ',message))
-        print("Message from Server: %s"%message)
-    UDPClientSocket.close()
+    # # Create a UDP socket at client side
+    # UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # print("Client started, listening for offer requests...")
+    # #GETserver using created UDP socket
+    # ixd=randrange(255)
+    # UDPClientSocket.bind(("127.0.0.{}".format(ixd), serverPort))
+    # while True:
+    #     message, clientAddress = UDPClientSocket.recvfrom(bufferSize)
+    #     print(struct.unpack('QQ',message))
+    #     print("Message from Server: %s"%message)
+    # UDPClientSocket.close()
     
     # msg = "Message from Server {}".format(msgFromServer[0])
     # print(msg)
-
-    ClientMultiSocket.close()
-
 
     # TCP
     ClientMultiSocket = socket.socket()
@@ -72,22 +69,23 @@ def client():
     except socket.error as e:
         print(str(e))
 
-    res1 = ClientMultiSocket.recv(1024)
+    res = ClientMultiSocket.recv(1024)
+    resres = ClientMultiSocket.recv(1024)
     time_plus_10 = time.time() + 10
     if time.time() <= time_plus_10:
     # while True:
+        print(res.decode('utf-8'))
+        print(resres.decode('utf-8'))
         print('Start pressing keys on your keyboard as fast as you can!!')
         # Input = input('Start pressing keys on your keyboard as fast as you can!!')
-        
-
         # duration is in seconds
-        
         s = input()
         # wait for time completion
 
         ClientMultiSocket.send(str.encode(s))
         res1 = ClientMultiSocket.recv(1024)
         res2 = ClientMultiSocket.recv(1024)
+        
         print(res1.decode('utf-8'))
         print(res2.decode('utf-8'))
 

@@ -15,6 +15,8 @@ global score_group2
 global group1
 global group2
 
+# client_dic_a[ip] = (ip, score)
+# client_dic_b[ip] = (ip, score)
 score_group1 = 0
 score_group2 = 0
 group1 = []
@@ -103,7 +105,7 @@ def start_tcp_server():
     for client in group2:
         message += str(client)
     message += "Start pressing keys on your keyboard as fast as you can!!\n"
-    print(message)
+    return message
     # TCPServerSocket.connect(group1[0])
     # TCPServerSocket.sendall(message.encode())
 def broadcast():
@@ -121,18 +123,26 @@ def broadcast():
         time.sleep(1)
 
 def multi_threaded_client(connection):
-        connection.send(str.encode('Server is working:'))
-        # time_plus_10 = time.time() + 10
-        # while time.time() <= time_plus_10:
-        while True:
-            data = connection.recv(2048)
-            msg ='Data From Client:' + data.decode('utf-8')
-            response = 'Server message: Game over!' 
-            if not data:
-                break
-            connection.sendall(str.encode(msg))
-            connection.sendall(str.encode(response))
-        connection.close()
+    groups = start_tcp_server()
+    connection.send(str.encode('Server is working:'))
+    connection.send(str.encode(groups))
+    # data = connection.recv(2048)
+    
+   
+ 
+    # time_plus_10 = time.time() + 10
+    # while time.time() <= time_plus_10:
+    while True:
+        data = connection.recv(2048)
+        # groups = start_tcp_server()
+        # connection.sendall(str.encode(groups))
+        msg ='Data From Client:' + data.decode('utf-8')
+        response = 'Server message: Game over!' 
+        if not data:
+            break
+        connection.sendall(str.encode(msg))
+        connection.sendall(str.encode(response))
+    connection.close()
  
 
 def server():
