@@ -127,21 +127,24 @@ def multi_threaded_client(connection):
     connection.send(str.encode('Server is working:'))
     connection.send(str.encode(groups))
     # data = connection.recv(2048)
-    
-   
- 
     # time_plus_10 = time.time() + 10
     # while time.time() <= time_plus_10:
     while True:
         data = connection.recv(2048)
         # groups = start_tcp_server()
         # connection.sendall(str.encode(groups))
-        msg ='Data From Client:' + data.decode('utf-8')
+        dataString = data.decode('utf-8')
+        print(type(dataString))
+        msg ='Data From Client:' + dataString
         response = 'Server message: Game over!' 
+        # message.length()
+        count = len(dataString) 
+        print(type(count))
         if not data:
             break
-        connection.sendall(str.encode(msg))
+        connection.send(str.encode(msg))
         connection.sendall(str.encode(response))
+        connection.send(str(count).encode())
     connection.close()
  
 

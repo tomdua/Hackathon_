@@ -26,7 +26,7 @@ def input():
             # t.start()
             print ('You have 10 seconds to type in your stuff...')
             Thread(target = check).start()
-            ans = getpass.getpass("Input something:"+'\n')
+            ans = getpass.getpass("Input something:")
             # t.join()
             # print(ans)
             return ans
@@ -85,10 +85,10 @@ def client():
         ClientMultiSocket.send(str.encode(s))
         res1 = ClientMultiSocket.recv(1024)
         res2 = ClientMultiSocket.recv(1024)
-        
+        res3 = ClientMultiSocket.recv(1024)
         print(res1.decode('utf-8'))
         print(res2.decode('utf-8'))
-
+        print(res3.decode('utf-8'))
     ClientMultiSocket.close()
 if __name__ == "__main__":
     client()
