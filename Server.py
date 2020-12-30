@@ -122,6 +122,25 @@ def broadcast():
         print('Message_sent')
         time.sleep(1)
 
+# def generate_end_message(groupA, groupB, namesA, namesB):
+def generate_end_message(namesA, namesB):
+    # countA = count_characters(groupA)
+    # countB = count_characters(groupB)
+    countA = 10
+    countB = 20
+    end_message = "Game over!\nGroup 1 typed in " + str(countA) + " characters. Group 2 typed in " + str(countB) + " characters.\n"
+    if countA > countB:
+        end_message += "Group 1 wins!\nCongratulations to the winners:\n==\n"
+        end_message += namesA
+    elif countB > countA:
+        end_message += "Group 2 wins!\nCongratulations to the winners:\n==\n"
+        end_message += namesB
+    else:
+        end_message += "Draw!\nCongratulations to the winners:\n==\n"
+        end_message += namesA
+        end_message += namesB
+    return end_message
+
 def multi_threaded_client(connection):
     groups = start_tcp_server()
     connection.send(str.encode('Server is working:'))
@@ -136,15 +155,18 @@ def multi_threaded_client(connection):
         dataString = data.decode('utf-8')
         print(type(dataString))
         msg ='Data From Client:' + dataString
-        response = 'Server message: Game over!' 
+        count = 'score of client:' + str(len(dataString))
+        # צריך להכניס פה את השמות בכל קבוצה לשלוף אותם למשתנים ולשים בפונקציה, בנוסף צריך להוסיף את סכום הקבוצות
+        response = 'Server message:\n Game over!' + generate_end_message( 'nicole\nnicole','tom\ntom')
         # message.length()
-        count = len(dataString) 
+         
         print(type(count))
         if not data:
             break
         connection.send(str.encode(msg))
+        connection.send(str.encode(count))
         connection.sendall(str.encode(response))
-        connection.send(str(count).encode())
+        
     connection.close()
  
 
