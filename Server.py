@@ -157,7 +157,7 @@ def multi_threaded_client(connection):
         msg ='Data From Client:' + dataString
         count = 'score of client:' + str(len(dataString))
         # צריך להכניס פה את השמות בכל קבוצה לשלוף אותם למשתנים ולשים בפונקציה, בנוסף צריך להוסיף את סכום הקבוצות
-        response = 'Server message:\n Game over!' + generate_end_message( 'nicole\nnicole','tom\ntom')
+        response = 'Server message:\n' + generate_end_message( 'nicole\nnicole','tom\ntom')
         # message.length()
          
         print(type(count))
