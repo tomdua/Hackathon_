@@ -1,117 +1,127 @@
+class colors:
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    F_White = "\x1b[97m"
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    HEADER = '\033[95m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    F_White = "\x1b[97m"
+    F_LightYellow = "\x1b[93m"
+    F_LightBlue = "\x1b[94m"
+    F_LightMagenta = "\x1b[95m"
+
 import socket
 import threading
 import time
 import struct
 from random import randrange
-import os
-from _thread import *
+from threading import Thread
+from _thread import start_new_thread
 
 localIP     = "127.0.0.1"
 localPort   = 20001
 bufferSize  = 2048
 servserPort = 13117
+global connection_client_dic
 global score_group1
 global score_group2
 global group1
 global group2
-
-# client_dic_a[ip] = (ip, score)
-# client_dic_b[ip] = (ip, score)
+global temp
+temp=''
+lock=threading.Lock()
 score_group1 = 0
 score_group2 = 0
-group1 = []
-group2 = []
- 
+group1 = {}
+group2 = {}
+connection_client_dic={}
+global namesA
+global namesB
+namesA=[]
+namesB=[]
+
 def conn_tcp_theard():
     # Create a datagram socket
-    TCPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
+    TCPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Bind to address and ip
     TCPServerSocket.bind((localIP, localPort))
     print("TCP server up and listening")
     TCPServerSocket.listen(10)
 
+
+
 def shutdown_server(UDPServerSocket):
         ''' Shutdown the UDP server '''
         print('Shutting down server...')
         UDPServerSocket.close()
-# def broadcast():
-#     # while True:
-#     #if start game or not
-#     # host_name=socket.gethostname()
-#     # ip=socket.gethostbyname(host_name)
-#     # ip_name =client_address.encode()
-#     # mes= "Server started, listening on IP address " + str(client_address)
-#     # print(mes)
-#     # resp='as'
-#     # time_plus_10 = time.time() + 10
-#     # while time.time() <= time_plus_10:
-    
-#     # UDPServerSocket.sendto(resp.encode('utf-8'), client_address)
-#     # print('\n', resp, '\n')
-#     # UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-#     UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-#     UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-#     UDPServerSocket.bind((localIP, localPort))
-#     UDPServerSocket.settimeout(0.2)
-#     magic_cookie = 0xfeedbeef
-#     message_type= 0x2
-#     message = struct.pack('QQQ', magic_cookie, message_type,localPort)
-#     while True:
-#         UDPServerSocket.sendto(message, ('<broadcast>', 13117))
-#         print('ms_sent')
 
-# def wait_for_client():
-#     ''' Wait for clients and handle their requests '''
-#     UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-#     UDPServerSocket.settimeout(10)
-#     # Bind to address and ip
-#     UDPServerSocket.bind((localIP, localPort))
-#     print("UDP server up and listening")
 
-#     clients=[]
-#     t_end = time.time() + 10
-#     try:
-#         UDPServerSocket.settimeout(t_end - time.time())
-#         while time.time() < t_end: # keep alive
-#             try: # receive request from client
-#                 data, client_address = UDPServerSocket.recvfrom(2024)
-#                 c_thread = threading.Thread(target = broadcast,
-#                                         args = (UDPServerSocket,data, client_address))
-#                 c_thread.daemon = True
-#                 c_thread.start()
-#                 clients.append(client_address)
-#                 rondom_team = randrange(2)
-#                 if rondom_team % 2 == 0:
-#                     group1.append(client_address)
-#                 else:
-#                     group2.append(client_address)
-#             except OSError as err:
-#                 print(err)
-                
-#     except KeyboardInterrupt:
-#         print("Time is up for connecting new players")
-#         shutdown_server(UDPServerSocket)
-#     return clients,group1,group2
-
-def start_tcp_server():
-    print("starting game")
+def random_teams(client_keys):
+    # print(type(connection_client_dic))
+    # print(connection_client_dic[client_keys][1])
+    rondom_team = randrange(20)
+    conn = connection_client_dic[client_keys][0]
+    port = connection_client_dic[client_keys][1]
+    if rondom_team % 2 == 0:
+        group1[client_keys]=(port,conn)
+        namesA.append(client_keys+'\n')
+        # print(namesA)
+    else:
+        group2[client_keys]=(port,conn)
+        # namesB =+ str(client_keys)+'\n'
+        namesB.append(client_keys+'\n')
+        # print(namesB)
+        
+def generate_start_message():
     message = "Welcome to Keyboard Spamming Battle Royale.\n"
     message += "Group 1:\n"
     message += "==\n"
-    for client in group1:
+    # message += str(namesA)
+    for client in namesA:
         message += str(client)
-    message += "Group 2:\n"
-    message += "==\n"
-    for client in group2:
+    message += "\nGroup 2:\n"
+    message += "==\n" 
+    # message += str(namesB)
+    for client in namesB:
         message += str(client)
-    message += "Start pressing keys on your keyboard as fast as you can!!\n"
+    message += "\nStart pressing keys on your keyboard as fast as you can!!\n"
     return message
-    # TCPServerSocket.connect(group1[0])
-    # TCPServerSocket.sendall(message.encode())
+    
+def start_tcp_game():
+    for client_keys in connection_client_dic.keys():
+        random_teams(client_keys)
+    begin_message= generate_start_message()
+    begin_message=begin_message.encode()
+    
+    for client_keys in connection_client_dic.values():
+        client_keys[0].send(begin_message)
+
+    time_plus_10 = time.time()
+    while time.time()<time_plus_10:
+        pass
+    for client_keys in group1.values():
+        number = len((client_keys[0].recv(bufferSize).decode()))
+        score_group1+=number
+    for client_keys in group2.values():
+        number = len((client_keys[0].recv(bufferSize).decode()))
+        score_group2+=number
+
+
 def broadcast():
     UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     UDPServerSocket.bind((localIP, localPort))
+    message = colors.OKCYAN+"Server started, listening on IP address " + localIP
+    print(message)
     UDPServerSocket.settimeout(0.5)
     magic_cookie = 0xfeedbeef
     message_type= 0x2
@@ -121,132 +131,115 @@ def broadcast():
         UDPServerSocket.sendto(message, ('<broadcast>',servserPort))
         print('Message_sent')
         time.sleep(1)
+    UDPServerSocket.close()
 
-# def generate_end_message(groupA, groupB, namesA, namesB):
-def generate_end_message(namesA, namesB):
-    # countA = count_characters(groupA)
-    # countB = count_characters(groupB)
+
+def connect_clients(tcp_connect):
+    # tcp_connect.settimeout(time.time()+10 - time.time())
+    try:            
+        time_plus_10 = time.time() + 10
+        tcp_connect.settimeout(time_plus_10 - time.time())
+        while True:
+            # while time.time() < time_plus_10:
+            #     try:
+                    # connection, client_address = tcp_connect.accept()
+                    # res3 = tcp_connect.recv(bufferSize)
+                    # print(res3.decode('utf-8'))
+                    # TeamName = str(tcp_connect.recv(1024), 'utf-8')
+                    # connection_client_dic[connection] = client_address
+                    # print("New player connected")
+                    # print(connection_client_dic[connection])
+                # except:
+                #     print("Time is up for connecting new players")
+        # TeamName = str(TCPServerSocket.recv(1024), 'utf-8')
+        # print(TeamName)
+            conn, client_address = tcp_connect.accept()
+            
+            data = conn.recv(2048)
+            thread_team_name = data.decode('utf-8')
+            lock.acquire()
+            #connection_client_dic[thread_team_name] = conn
+            connection_client_dic[thread_team_name] = conn,client_address
+            # start_new_thread(multi_threaded_client,(conn,))
+            # time.sleep(10)
+            print("New player connected")
+            # print(connection_client_dic[thread_team_name])
+            # print(conn)
+            # start_new_thread(multi_threaded_client,(conn,))
+            lock.release()
+        tcp_connect.close()
+
+    except:
+        mes='time_up'
+
+
+def generate_end_message():
+    # countA = count_characters(group1)
+    # countB = count_characters(group2)
     countA = 10
     countB = 20
-    end_message = "Game over!\nGroup 1 typed in " + str(countA) + " characters. Group 2 typed in " + str(countB) + " characters.\n"
+    end_message = "\nGame over!\nGroup 1 typed in " + str(countA) + " characters. Group 2 typed in " + str(countB) + " characters.\n"
     if countA > countB:
-        end_message += "Group 1 wins!\nCongratulations to the winners:\n==\n"
-        end_message += namesA
+        end_message += "\nGroup 1 wins!\nCongratulations to the winners:\n==\n"
+        for client in namesA:
+            end_message += str(client)
     elif countB > countA:
-        end_message += "Group 2 wins!\nCongratulations to the winners:\n==\n"
-        end_message += namesB
+        end_message += "\nGroup 2 wins!\nCongratulations to the winners:\n==\n"
+        for client in namesB:
+            end_message += str(client)
     else:
-        end_message += "Draw!\nCongratulations to the winners:\n==\n"
-        end_message += namesA
-        end_message += namesB
+        end_message += "\nDraw!\nCongratulations to the winners:\n==\n"
+        for client in namesA:
+            end_message += str(client)
+        for client in namesB:
+            end_message += str(client)
     return end_message
 
+
+
 def multi_threaded_client(connection):
-    groups = start_tcp_server()
-    connection.send(str.encode('Server is working:'))
-    connection.send(str.encode(groups))
-    # data = connection.recv(2048)
-    # time_plus_10 = time.time() + 10
-    # while time.time() <= time_plus_10:
-    while True:
-        data = connection.recv(2048)
+    try:
+        groups = start_tcp_game()
+        connection.send(str.encode('Server is working:'))
+        connection.send(str.encode(groups))
+        data = connection.recv(bufferSize)
         # groups = start_tcp_server()
         # connection.sendall(str.encode(groups))
         dataString = data.decode('utf-8')
-        print(type(dataString))
         msg ='Data From Client:' + dataString
         count = 'score of client:' + str(len(dataString))
-        # צריך להכניס פה את השמות בכל קבוצה לשלוף אותם למשתנים ולשים בפונקציה, בנוסף צריך להוסיף את סכום הקבוצות
         response = 'Server message:\n' + generate_end_message( 'nicole\nnicole','tom\ntom')
         # message.length()
-         
+        
         print(type(count))
-        if not data:
-            break
+
         connection.send(str.encode(msg))
         connection.send(str.encode(count))
         connection.sendall(str.encode(response))
-        
-    connection.close()
- 
+
+    except:
+        print('hi')
 
 def server():
-    thread_udp = threading.Thread(target = broadcast,args = ())
-    thread_udp.start()
-    thread_tcp = threading.Thread(target=conn_tcp_theard(), args=())
-    thread_tcp.start()
-
-    ServerSideSocket = socket.socket()
-    host = '127.0.0.1'
-    # port = 2004
-    port = 2001
-    ThreadCount = 0
-    try:
-        ServerSideSocket.bind((host, port))
-    except socket.error as e:
-        print(str(e))
-    print('Socket is listening..')
-    ServerSideSocket.listen(5)
-    while True:
-        Client, address = ServerSideSocket.accept()
-        print('Connected to: ' + address[0] + ':' + str(address[1]))
-        start_new_thread(multi_threaded_client, (Client, ))
-        ThreadCount += 1
-        print('Thread Number: ' + str(ThreadCount))
-    ServerSideSocket.close()
-
-
-
-    # thread_tcp = threading.Thread(target=conn_tcp_theard(), args=())
-    # thread_tcp.start()
-    # msgFromServer       = "Hello UDP Client"
-    # bytesToSend         = str.encode(msgFromServer)
-    # # Create a datagram socket
-    # UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    # UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-    # # Enable broadcasting mode
-    # UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-
+    # tcp_connect=conn_tcp_theard
+    # Create a datagram socket
+    TCPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Bind to address and ip
-    # UDPServerSocket.bind((localIP, localPort))
-    # print("UDP server up and listening")
-    # Listen for incoming datagrams
-    # while(True):
-    #     bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-    #     message = bytesAddressPair[0]
-    #     address = bytesAddressPair[1]
-    #     clientMsg = "Message from Client:{}".format(message)
-    #     clientIP  = "Client IP Address:{}".format(address)
-    #     print(clientMsg)
-    #     print(clientIP)
-    #     # Sending a reply to client
-    #     UDPServerSocket.sendto(bytesToSend, address)
-   
-   
-    # # Set a timeout so the socket does not block
-    # # indefinitely when trying to receive data.
-    # UDPServerSocket.settimeout(10)
-    # message = b"your very important message"
-    # start_time = time.time()
-    # while time.time() - start_time < 10:
-    #     UDPServerSocket.sendto(message, ("127.0.0.1", 20001))
-    #     print("message sent!")
-    #     time.sleep(1)
-    #     clients,group1,group2 = wait_for_client(UDPServerSocket)
-    #     # UDPServerSocket.close()  
-    # UDPServerSocket.close()
+    TCPServerSocket.bind((localIP, 11117))
+    print("TCP server up and listening")
+    TCPServerSocket.listen(10)
 
+    connection_client_dic={}
+    thread_udp = Thread(target = broadcast,args = ())
+    thread_tcp = Thread(target = connect_clients,args=(TCPServerSocket,))
+    # start_new_thread(multi_threaded_client,(temp.decode('utf-8'),))
 
-    # msgFromServer       = "Hello TCP Client"
-    # bytesToSend         = str.encode(msgFromServer)
-    # # Create a datagram socket
-    # TCPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
-    # # Bind to address and ip
-    # TCPServerSocket.bind((localIP, localPort))
-    # print("TCP server up and listening")
-    #     # # start_tcp_server(TCPServerSocket,group1,group2)
-
+    thread_udp.start()
+    thread_tcp.start()
+    thread_udp.join()
+    thread_tcp.join()
+    start_tcp_game()
+    TCPServerSocket.close()
 
 if __name__ == "__main__":
     server()
