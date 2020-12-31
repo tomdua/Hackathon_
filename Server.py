@@ -180,6 +180,7 @@ def connect_clients(tcp_connect):
     connect to all clients on tcp protcol
     @param - a tcp connection from the start server
     """
+    new_player_connected=False
     try:            
         time_plus_10 = time.time() + SEC_10
         tcp_connect.settimeout(time_plus_10 - time.time())
@@ -190,9 +191,14 @@ def connect_clients(tcp_connect):
             lock.acquire()
             connection_client_dic[thread_team_name] = conn,client_address
             print("New player connected")
+            new_player_connected=True
             lock.release()
     except Exception as e:
-        print(e)
+        if new_player_connected:
+            print('Time out to connect, Start Game')
+        else:
+            print('Time out to connect, and no one connect! Bye-Bye')
+            tcp_connect.close()
 
 def start_server():
     """
