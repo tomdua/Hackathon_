@@ -1,94 +1,78 @@
+from colors import colors
 import socket
 import time
 import signal, os
 import sys, select
-import threading, msvcrt
 import getpass
 import ssl
 from threading import Timer
 from threading import Thread
 import struct
 from random import randrange
-TIMEOUT = 10
-answer = None
+import time
+global finish_game
+finish_game = False
 
-def check():
-            # print ('You have 10 seconds to type in your stuff...')
-            time.sleep(10)
-            if answer != None:
-                return 
-            # print("Too Slow")
-
-def input():
+def keyboard_event_handler(tcp_socket):
+    """
+    part of game mode - collect characters and from the keyboard and send them over TCP. collect
+    data from the network. Input input - typing from the customer
+    """
     try:
-            # answer = input("Input something: ")
-            # t = Timer(10, timeout)
-            # t.start()
-            print ('You have 10 seconds to type in your stuff...')
-            Thread(target = check).start()
-            ans = getpass.getpass("Input something:")
-            # t.join()
-            # print(ans)
-            return ans
-    except:
-            # timeout
-            return "You said nothing!"
+        with Input(keynames='curses') as input_generator:
+            e = input_generator.send(10)
+            future = time.time() + 10
+            while e is not None:
+                if finish_game:
+                    break 
+                tcp_socket.send(bytes(e, 'utf-8'))
+                curr = future - time.time()
+                e = input_generator.send(curr)
+                
+    except KeyboardInterrupt as e:
+        raise KeyboardInterrupt("Interaption.")
+
+
 
 def client():
+    """
+    Our main method in which we open connections in front of the server
+    """
     msgFromClient       = "Hello UDP Server"
-    bytesToSend         = str.encode(msgFromClient)
-    serverAddressPort   = ("127.0.0.1", 20001)
+    # bytesToSend         = str.encode(msgFromClient)
+    # serverAddressPort   = ("127.0.0.1", 20001)
     bufferSize          = 2048
     serverPort          = 13117
+    serverTCPPort       = 11117
 
+    # Create a UDP socket at client side
+    UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    print("Client started, listening for offer requests...")
+    #GET server using created UDP socket
+    ixd=randrange(255)
+    UDPClientSocket.bind(("127.0.0.{}".format(ixd), serverPort))
+    message, clientAddress = UDPClientSocket.recvfrom(bufferSize)
+    print(struct.unpack('QQ',message))
+    print("Message from Server: %s"%message)
+    address = struct.unpack('QQ',message)
+    tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    tcp_socket.connect((clientAddress[0], serverTCPPort))
+    tcp_socket.send("Yalla Hiafa.{}".format(ixd).encode("utf-8"))
 
-    # # Create a UDP socket at client side
-    # UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    # print("Client started, listening for offer requests...")
-    # #GETserver using created UDP socket
-    # ixd=randrange(255)
-    # UDPClientSocket.bind(("127.0.0.{}".format(ixd), serverPort))
-    # while True:
-    #     message, clientAddress = UDPClientSocket.recvfrom(bufferSize)
-    #     print(struct.unpack('QQ',message))
-    #     print("Message from Server: %s"%message)
-    # UDPClientSocket.close()
-    
-    # msg = "Message from Server {}".format(msgFromServer[0])
-    # print(msg)
+    server_listen_text = tcp_socket.recv(bufferSize)
+    open_client_text = tcp_socket.recv(bufferSize)
 
-    # TCP
-    ClientMultiSocket = socket.socket()
-    host = '127.0.0.1'
-    # port = 2004
-    port = 2001
-
-    print('Waiting for connection response')
-    try:
-        ClientMultiSocket.connect((host, port))
-    except socket.error as e:
-        print(str(e))
-
-    res = ClientMultiSocket.recv(1024)
-    resres = ClientMultiSocket.recv(1024)
+    # pass
     time_plus_10 = time.time() + 10
-    if time.time() <= time_plus_10:
-    # while True:
-        print(res.decode('utf-8'))
-        print(resres.decode('utf-8'))
-        # print('Start pressing keys on your keyboard as fast as you can!!')
-        # Input = input('Start pressing keys on your keyboard as fast as you can!!')
-        # duration is in seconds
-        s = input()
-        # wait for time completion
+    while time.time() < time_plus_10:  # wait for input
+        pass
+        
+    print(server_listen_text.decode('utf-8'))
+    print(open_client_text.decode('utf-8'))
+    # print ('You have 10 seconds to type in your stuff...')
+    tcp_socket.sendall(b"a")
+    
+    # keyboard_event_handler(tcp_socket) - not work becsue the server
 
-        ClientMultiSocket.send(str.encode(s))
-        res1 = ClientMultiSocket.recv(1024)
-        res2 = ClientMultiSocket.recv(1024)
-        res3 = ClientMultiSocket.recv(1024)
-        print(res1.decode('utf-8'))
-        print(res2.decode('utf-8'))
-        print(res3.decode('utf-8'))
-    ClientMultiSocket.close()
 if __name__ == "__main__":
     client()
