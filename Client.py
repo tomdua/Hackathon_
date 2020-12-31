@@ -20,8 +20,6 @@ SEC_10                      = 10
 localIP                     = "127.0.0.1"
 BIT_UNICODE_TRANSFORMATION  = 'utf-8'
 
-
-
 def keyboard_event_handler(tcp_socket):
     """
     part of game mode - collect characters and from the keyboard and send them over TCP. collect
