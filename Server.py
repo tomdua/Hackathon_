@@ -13,6 +13,8 @@ servserPort                 = 13117
 tcpPort                     = 11117
 SEC_10                      = 10
 BIT_UNICODE_TRANSFORMATION  = 'utf-8'
+MAGIC_COOKIE                = 0xfeedbeef
+MASSAGE_TYPE                = 0x2
 
 global connection_client_dic
 global score_group1
@@ -40,18 +42,28 @@ def keybord():
     : not check yet on server becuse its all the time diesconect
     """
     for sock in group1.values():
-        threading.Thread(target=count_massage, args=(sock[1])).start()
+        threading.Thread(target=count_massageA, args=(sock[1])).start()
     for sock in group2.values():
         threading.Thread(target=count_massage, args=(sock[1])).start()
     answer = False
 
-def count_massage(sock):
+# Calculates the results of group1
+def count_massageA(sock):
     """
-    count click massages
+    count click massages group1
     """
     while answer:
         m = sock[1].recv(bufferSize)
-        score_group1['a'] += 1
+        score_group1 += 1
+
+# Calculates the results of group2
+def count_massageB(sock):
+    """
+    count click massages group2
+    """
+    while answer:
+        m = sock[1].recv(bufferSize)
+        score_group2 += 1
 
 def shutdown_server(UDPServerSocket,TCPServerSocket):
     """
@@ -76,20 +88,13 @@ def random_teams(client_keys):
         group2[client_keys]=(port,conn)
         namesB.append(client_keys+'\n')
 
-# Calculates the results of the one group
-def counter_the_message(mane_group):
-    if mane_group == group1:
-        return 10
-    if mane_group == group2 :
-        return 20
-
 def generate_end_message():
     """
     create and send to all clients the end message
     @return -  byte message
     """
-    countA = counter_the_message(group1)
-    countB = counter_the_message(group2)
+    countA = score_group1
+    countB = score_group2
     end_message = "\nGame over!\nGroup 1 typed in " + str(countA) + " characters. Group 2 typed in " + str(countB) + " characters.\n"
     if countA > countB:
         end_message += "\nGroup 1 wins!\nCongratulations to the winners:\n==\n"
@@ -173,9 +178,8 @@ def broadcast():
         message = colors.OKCYAN+"Server started, listening on IP address " + localIP
         print(message)
         UDPServerSocket.settimeout(0.5)
-        magic_cookie = 0xfeedbeef
-        message_type= 0x2
-        message = struct.pack('QQ', magic_cookie, message_type)
+
+        message = struct.pack('QQ', MAGIC_COOKIE, MASSAGE_TYPE)
         time_plus_10=time.time()+SEC_10
         while time_plus_10>time.time():
             UDPServerSocket.sendto(message, ('<broadcast>',servserPort))
@@ -191,6 +195,7 @@ def connect_clients(tcp_connect):
     connect to all clients on tcp protcol
     @param - a tcp connection from the start server
     """
+    new_player_connected=False
     try:            
         time_plus_10 = time.time() + SEC_10
         tcp_connect.settimeout(time_plus_10 - time.time())
@@ -201,6 +206,7 @@ def connect_clients(tcp_connect):
             lock.acquire()
             connection_client_dic[thread_team_name] = conn,client_address
             print("New player connected")
+            new_player_connected=True
             lock.release()
     except :
         print("tcp connection refused/failed")
