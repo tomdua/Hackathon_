@@ -27,8 +27,8 @@ def keyboard_event_handler(tcp_socket):
     """
     try:
         with Input(keynames='curses') as input_generator:
-            e = input_generator.send(10)
-            future = time.time() + 10
+            e = input_generator.send(SEC_10)
+            future = time.time() + SEC_10
             while e is not None:
                 if finish_game:
                     break 

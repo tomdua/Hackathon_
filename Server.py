@@ -13,6 +13,8 @@ servserPort                 = 13117
 tcpPort                     = 11117
 SEC_10                      = 10
 BIT_UNICODE_TRANSFORMATION  = 'utf-8'
+MAGIC_COOKIE                = 0xfeedbeef
+MASSAGE_TYPE                = 0x2
 
 global connection_client_dic
 global score_group1
@@ -161,9 +163,8 @@ def broadcast():
         message = colors.OKCYAN+"Server started, listening on IP address " + localIP
         print(message)
         UDPServerSocket.settimeout(0.5)
-        magic_cookie = 0xfeedbeef
-        message_type= 0x2
-        message = struct.pack('QQ', magic_cookie, message_type)
+
+        message = struct.pack('QQ', MAGIC_COOKIE, MASSAGE_TYPE)
         time_plus_10=time.time()+SEC_10
         while time_plus_10>time.time():
             UDPServerSocket.sendto(message, ('<broadcast>',servserPort))
