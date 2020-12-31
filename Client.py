@@ -17,14 +17,19 @@ bufferSize                  = 2048
 serverPort                  = 13117
 serverTCPPort               = 11117
 SEC_10                      = 10
-localIP                     = "127.0.0.1"
+LOACL_IP                     = "127.0.0.1"
 BIT_UNICODE_TRANSFORMATION  = 'utf-8'
+TEAM_NAME                   = 'Yalla_Hiafa'
 
 def keyboard_event_handler(tcp_socket):
-    """
-    part of game mode - collect characters and from the keyboard and send them over TCP. collect
+    """ part of game mode - collect characters and from the keyboard and send them over TCP. collect
     data from the network. Input input - typing from the customer
-    """
+    Args:
+        tcp_socket (CONNECT): tcp connect socket
+
+    Raises:
+        KeyboardInterrupt
+   """
     try:
         with Input(keynames='curses') as input_generator:
             e = input_generator.send(SEC_10)
@@ -52,8 +57,8 @@ def client():
         UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         print("Client started, listening for offer requests...")
         #GET server using created UDP socket
-        ixd=randrange(255)
-        UDPClientSocket.bind(("127.0.0.{}".format(ixd), serverPort))
+        random_prefix=randrange(255)
+        UDPClientSocket.bind((LOACL_IP+str(random_prefix), serverPort))
         message, clientAddress = UDPClientSocket.recvfrom(bufferSize)
         # print(struct.unpack('QQ',message))
         # print("Message from Server: %s"%message)
@@ -64,7 +69,7 @@ def client():
 
     tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tcp_socket.connect((clientAddress[0], serverTCPPort))
-    tcp_socket.send("Yalla Hiafa.{}".format(ixd).encode(BIT_UNICODE_TRANSFORMATION))
+    tcp_socket.send((TEAM_NAME+str(random_prefix)).encode(BIT_UNICODE_TRANSFORMATION))
 
     server_listen_text = tcp_socket.recv(bufferSize)
     open_client_text = tcp_socket.recv(bufferSize)

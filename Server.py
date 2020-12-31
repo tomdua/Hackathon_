@@ -62,8 +62,8 @@ def count_massageB(sock):
     count click massages group2
     """
     while answer:
-        m = sock[1].recv(bufferSize)
-        score_group2 += 1
+            m = sock[1].recv(bufferSize)
+            score_group2 += 1
 
 def shutdown_server(UDPServerSocket,TCPServerSocket):
     """
@@ -170,6 +170,9 @@ def broadcast():
     The offer message contains: Magic cookie,Message type and Server port
     send a broadcast massages on udp prtocol (use udp socket)
     use struct package
+
+    Raises:
+        Exception : UDPServerSocket clost
     """
     try:
         UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -193,7 +196,10 @@ def broadcast():
 def connect_clients(tcp_connect):
     """
     connect to all clients on tcp protcol
-    @param - a tcp connection from the start server
+    Args:
+         a tcp connection from the start server
+    Raises:
+        TimeOut: if 10 secands end 
     """
     new_player_connected=False
     try:            
@@ -208,8 +214,12 @@ def connect_clients(tcp_connect):
             print("New player connected")
             new_player_connected=True
             lock.release()
-    except :
-        print("tcp connection refused/failed")
+    except Exception as e:
+        if new_player_connected:
+            print('Time out to connect, Start Game')
+        else:
+            print('Time out to connect, and no one connect! Bye-Bye')
+            tcp_connect.close()
 
 def start_server():
     """
