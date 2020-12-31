@@ -30,7 +30,6 @@ global namesA
 global namesB
 namesA=[]
 namesB=[]
-
 global answer
 answer = True
 
@@ -64,7 +63,8 @@ def shutdown_server(UDPServerSocket,TCPServerSocket):
 
 def random_teams(client_keys):
     """
-    split teams to 2 teams, and inster to list of names
+    Receiving the clients names and dividing them into 2 groups at random
+    (each client is treated separately), and inster to list of names
     """
     rondom_team = randrange(20)
     conn = connection_client_dic[client_keys][0]
@@ -76,15 +76,20 @@ def random_teams(client_keys):
         group2[client_keys]=(port,conn)
         namesB.append(client_keys+'\n')
 
+# Calculates the results of the one group
+def counter_the_message(mane_group):
+    if mane_group == group1:
+        return 10
+    if mane_group == group2 :
+        return 20
 
 def generate_end_message():
     """
     create and send to all clients the end message
     @return -  byte message
-
     """
-    countA = 10
-    countB = 20
+    countA = counter_the_message(group1)
+    countB = counter_the_message(group2)
     end_message = "\nGame over!\nGroup 1 typed in " + str(countA) + " characters. Group 2 typed in " + str(countB) + " characters.\n"
     if countA > countB:
         end_message += "\nGroup 1 wins!\nCongratulations to the winners:\n==\n"
@@ -100,14 +105,14 @@ def generate_end_message():
             end_message += str(client)
         for client in namesB:
             end_message += str(client)
-    end_message += "\nGame Over\n==\n"
+    end_message += "\nGame over, sending out offer requests...\nServer disconnected, listening for offer requests..."
     return end_message
 
+#The function sends the starting game message to all of the clients
 def generate_start_message():
     """
     create and send to all clients the start(welcome) message
     @return -  byte message
-
     """
     message = "Welcome to Keyboard Spamming Battle Royale.\n"
     message += "Group 1:\n"
@@ -124,33 +129,40 @@ def generate_start_message():
 
 def start_game():
     """
-    start the clients game
+    Responsible for managing the game:
+        creating a start game message
+        Calling to the function that responsible for running the game
+        Calling to the function that responsible for ending the game
     call the split function, keybord listner
     """
-    count=0
-    for client_keys in connection_client_dic.keys():
-        random_teams(client_keys)
-    begin_message= generate_start_message()
-    begin_message=begin_message.encode()
-    
-    end_message= generate_end_message()
-    end_message= end_message.encode()
-    for client_keys in connection_client_dic.values():
-        client_keys[0].send(begin_message)
-        client_keys[0].send(end_message)
+    try:
+        for client_keys in connection_client_dic.keys():
+            random_teams(client_keys)
+        begin_message= generate_start_message()
+        begin_message=begin_message.encode()
+        
+        end_message= generate_end_message()
+        end_message= end_message.encode()
+        for client_keys in connection_client_dic.values():
+            client_keys[0].send(begin_message)
+            client_keys[0].send(end_message)
 
-    # for client_keys in connection_client_dic.values():
-    #      count+=client_keys[0].recv(bufferSize).decode()
+        # for client_keys in connection_client_dic.values():
+        #      count+=client_keys[0].recv(bufferSize).decode()
 
-    # x = threading.Thread(target=keybord, args=())
-    # x.start()
-    time_plus_10 = time.time()+SEC_10
-    while time.time()<time_plus_10:
-        time.sleep(1)
-        pass
+        # x = threading.Thread(target=keybord, args=())
+        # x.start()
+        time_plus_10 = time.time()+SEC_10
+        while time.time()<time_plus_10:
+            time.sleep(1)
+            pass
+    except:
+        print("Client disconnected")
 
 def broadcast():
     """
+    Creating a udp socket and sending offers message for Cliens.
+    The offer message contains: Magic cookie,Message type and Server port
     send a broadcast massages on udp prtocol (use udp socket)
     use struct package
     """
@@ -190,8 +202,8 @@ def connect_clients(tcp_connect):
             connection_client_dic[thread_team_name] = conn,client_address
             print("New player connected")
             lock.release()
-    except Exception as e:
-        print(e)
+    except :
+        print("tcp connection refused/failed")
 
 def start_server():
     """
@@ -205,8 +217,8 @@ def start_server():
             TCPServerSocket.bind((localIP, tcpPort))
             print("TCP server up and listening")
             TCPServerSocket.listen(SEC_10)
-        except Exception as e:
-            print(e)
+        except :
+            print("fail in getting typing from client")
 
         connection_client_dic={}
         thread_udp = Thread(target = broadcast,args = ())
@@ -218,8 +230,8 @@ def start_server():
         thread_tcp.join()
         start_game()
         shutdown_server(TCPServerSocket,TCPServerSocket)
-    except EOFError as error:
-        print(error)
+    except :
+        print("client connection lost")
 
     
 

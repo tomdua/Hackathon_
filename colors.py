@@ -1,3 +1,5 @@
+
+#The class is for colored messages
 class colors:
     FAIL = '\033[91m'
     ENDC = '\033[0m'

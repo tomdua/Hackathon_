@@ -38,6 +38,7 @@ def keyboard_event_handler(tcp_socket):
                 
     except KeyboardInterrupt as e:
         raise KeyboardInterrupt("Interaption.")
+        print("fail in getting tuch func")
 
 
 def client():
@@ -46,6 +47,7 @@ def client():
     """
 
     # Create a UDP socket at client side
+    #the UDP server which sends offers for 10 sec and connect all the clients that respond to those offers
     try:
         UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         print("Client started, listening for offer requests...")
@@ -67,14 +69,12 @@ def client():
     server_listen_text = tcp_socket.recv(bufferSize)
     open_client_text = tcp_socket.recv(bufferSize)
     end_client_text = tcp_socket.recv(bufferSize)
-    # pass
-
+    
+    # start game
     time_plus_10 = time.time() + SEC_10
     while time.time() < time_plus_10:  # wait for input
         time.sleep(1)
-        pass
-    
-        
+        pass   
     print(colors.BOLD+server_listen_text.decode(BIT_UNICODE_TRANSFORMATION))
     print(colors.OKGREEN+open_client_text.decode(BIT_UNICODE_TRANSFORMATION))
     print(colors.F_LightYellow+end_client_text.decode(BIT_UNICODE_TRANSFORMATION))
