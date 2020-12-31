@@ -1,4 +1,4 @@
-# Hackhaton
+# Hackhaton 2020 Data Communication
   * This is our Hackhaton project of the course 'Introduction to Data Communication' as part of a bachelor's degree in information systems engineering at "Ben Gurion university of the Negev in the Faculty of Engineering.
 The project deals with server-client, TCP UDP connection.
 
