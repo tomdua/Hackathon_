@@ -12,4 +12,3 @@ The project deals with server-client, TCP UDP connection.
   * Nicole Dezoraive [Email](nicoled@post.bgu.ac.il),[Git](https://github.com/NicoleDezoraive),[Linkedin](https://www.linkedin.com/in/nicole-dezoraive-124b74168),
   * Tom Duany  [Email](tomduany@gmail.com),[Git](https://github.com/tomdua),[Linkedin](https://www.linkedin.com/in/tom-duany-1ab71b141/),
 
-![Tom&Nicole](https://github.com/tomdua/Hackathon_/blob/main/tom%26nicole.jpeg)
